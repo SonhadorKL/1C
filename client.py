@@ -39,7 +39,7 @@ class Client:
         """
         Запускает одну партию эксперимента
         """
-        print("Эксперимент начался!")
+        print("Эксперимент начался!\nВам предстоит угадать число от 1 до 100.\nНа каждый ваш ответ вы будете узнавать, ваше число больше/меньше заданного")
         history = []
         while True:
             guess = input("Введите ваше предположение (число) или history, чтобы посмотреть историю ответов: ")
@@ -87,8 +87,7 @@ class Client:
                 break
 
 if __name__ == "__main__":
-    # server_ip = input("Введите IP сервера: ")
-    server_ip = "0.0.0.0"
+    server_ip = input("Введите IP сервера: ")
     server_port = 5555
     
     client = Client(server_ip, server_port)
