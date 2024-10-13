@@ -7,7 +7,7 @@ import json
 class Server:
     def __init__(self) -> None:
         self.clients = {}
-        self.leaderboard = []
+        self.leaderboard = {}
         self.active_users = 0
         self.number_to_guess = 0
         self.experiment_active = False
@@ -17,6 +17,8 @@ class Server:
         """
         Загадывает случайное число и посылает сигнал пользователям о начале игры
         """
+        for client in self.clients.values():
+            client['attempts'] = 0
         self.number_to_guess = random.randint(1, 100)
         print("Эксперимент начался! Загаданное число:", self.number_to_guess)
         self.experiment_active = True
@@ -63,8 +65,13 @@ class Server:
                     self.clients[client_id]['history'].append(guess)
                     if guess == self.number_to_guess:
                         response = {"result": "correct"}
-                        self.leaderboard.append({"client": client_id, "attempts": self.clients[client_id]['attempts']})
                         client_socket.send(json.dumps(response).encode('utf-8'))
+                        
+                        if client_id in self.leaderboard:
+                            self.leaderboard[client_id] += self.clients[client_id]['attempts']
+                        else:
+                            self.leaderboard[client_id] = self.clients[client_id]['attempts']
+
                         self.active_users -= 1
                         print(f"Участник {client_id} правильно угадал. Осталось {self.active_users} участников")
                     elif guess < self.number_to_guess:
@@ -95,7 +102,7 @@ class Server:
         """
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(('0.0.0.0', 5555))
-        self.server.listen(5)
+        self.server.listen()
         self.server.setblocking(0)
         print("Сервер запущен, ожидание подключений...")
         self.server_running = True
@@ -111,7 +118,7 @@ class Server:
         print(f"Подключилось {len(self.clients)} человек")
         self.experiment_active = True
         while True:
-            command = input("Введите команду (start/leaderboard/clients): ")
+            command = input("Введите команду (start/leaderboard/clients/exit): ")
             if command == "start":
                 self.start_experiment()
                 print(f"Ожидаем ответы от участников: {self.active_users}")
@@ -119,8 +126,8 @@ class Server:
                     pass
             elif command == "leaderboard":
                 print("Таблица лидеров:")
-                for entry in self.leaderboard:
-                    print(f"Участник {entry['client']} - {entry['attempts']} попыток")
+                for key in self.leaderboard.keys():
+                    print(f"Участник {key} - {self.leaderboard[key]} попыток")
             elif command == "clients":
                 print("Список участников:")
                 for client_id in self.clients.keys():
@@ -133,4 +140,3 @@ class Server:
 if __name__ == "__main__":
     server = Server()
     server.run()
-
