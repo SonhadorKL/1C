@@ -86,6 +86,7 @@ class Server:
                 break
         client_socket.close()
         del self.clients[client_id]
+        del self.leaderboard[client_id]
 
 
     def close_connection(self):
