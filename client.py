@@ -42,10 +42,14 @@ class Client:
         print("Эксперимент начался!")
         history = []
         while True:
-            guess = input("Введите ваше предположение: ")
+            guess = input("Введите ваше предположение (число) или history, чтобы посмотреть историю ответов: ")
+            if guess == 'history':
+                print("История ваших предположений: ", history)
+                continue
+            
             if not guess.isalnum():
                 continue
-
+            
             self.client_socket.send(json.dumps({"action": "guess", "number": guess}).encode('utf-8'))
 
             response = json.loads(self.client_socket.recv(1024).decode('utf-8'))
@@ -58,7 +62,6 @@ class Client:
                 print("Загаданное число больше")
             elif response['result'] == "lesser":
                 print("Загаданное число меньше")
-        print("История ваших предположений:", history)
         print("Ожидайте следующих указаний от ученых")
 
 
